@@ -5,6 +5,11 @@ import os
 from io import BytesIO
 import base64
 
+views = [
+        "Top View", "Bottom View", "Left Side View", "Right Side View",
+        "Front View", "Back View", "Fin Right Side View", "Fin Left Side View",
+        "Fin Front View", "Fin Back View"
+    ]
 # Set your OpenAI API key
 client = OpenAI()
 
@@ -45,21 +50,19 @@ def validate_and_rate_images(images, views):
         rating = response.choices[0].message.content.strip()
         results.append(f"View: {view}, Rating: {rating}")
     
-    return results
+    results_str = "\n".join(results)
+    
+    return results_str
 
 # Gradio interface
 def upload_images(*images):
-    views = [
-        "Top View", "Bottom View", "Left Side View", "Right Side View",
-        "Front View", "Back View", "Fin Right Side View", "Fin Left Side View",
-        "Fin Front View", "Fin Back View"
-    ]
     return validate_and_rate_images(images, views[:len(images)])
 
 # Create Gradio interface
 with gr.Blocks() as demo:
     gr.Markdown("## Surfboard Image Validator")
-    image_inputs = [gr.Image(type="pil", label=f"Image {i+1}") for i in range(6)]
+    image_inputs =  [gr.Image(type="pil", label=f"Image {i+1} - {view}") for i, view in enumerate(views)]
+
     output = gr.Textbox(label="Results")
     submit_button = gr.Button("Validate and Rate")
     submit_button.click(upload_images, inputs=image_inputs, outputs=output)
